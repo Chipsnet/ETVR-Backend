@@ -7,14 +7,26 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from app.logger import setup_logger
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.etvr import ETVR
 
+origins = [
+    "http://localhost",
+    "http://localhost:8000",
+]
 
 def setup_app():
     setup_logger()
     etvr_app = ETVR()
     etvr_app.add_routes()
     app = FastAPI()
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=['*'],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     app.include_router(etvr_app.router)
     app.mount("/images", StaticFiles(directory="assets/images"))
     app.add_route("/", FileResponse("assets/index.html"), methods=["GET"])
